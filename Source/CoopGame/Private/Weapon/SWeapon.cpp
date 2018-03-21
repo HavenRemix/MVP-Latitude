@@ -11,6 +11,7 @@
 #include "CoopGame.h"
 #include "TimerManager.h"
 #include "Net/UnrealNetwork.h"
+#include "Sound/SoundCue.h"
 
 
 static int32 DebugWeaponDrawing = 0;
@@ -71,6 +72,9 @@ void ASWeapon::Fire()
 		AActor* MyOwner = GetOwner();
 		if (MyOwner)
 		{
+			//Play Start Sound
+			UGameplayStatics::PlaySoundAtLocation(this, FireStartSound, GetActorLocation());
+
 			FVector EyeLocation;
 			FRotator EyeRotation;
 			MyOwner->GetActorEyesViewPoint(EyeLocation, EyeRotation);
@@ -130,12 +134,16 @@ void ASWeapon::Fire()
 			}
 
 			LastFireTime = GetWorld()->TimeSeconds;
+
+			//Play End Sound
+			UGameplayStatics::PlaySoundAtLocation(this, FireEndSound, GetActorLocation());
 		}
 	}
 	else {
 		AActor* MyOwner = GetOwner();
 		if (MyOwner)
 		{
+			UGameplayStatics::PlaySoundAtLocation(this, FireStartSound, GetActorLocation());
 			SpawnProjectile();
 		}
 	}

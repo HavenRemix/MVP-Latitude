@@ -10,6 +10,7 @@ class USkeletalMeshComponent;
 class UDamageType;
 class UParticleSystem;
 class UCameraComponent;
+class USoundCue;
 
 // Contains information of a single hitscan weapon linetrace
 USTRUCT()
@@ -101,6 +102,14 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	bool bIsProjectile;
+
+// ------- AUDIO ------- \
+
+	UPROPERTY(EditDefaultsOnly, Category = "Audio")
+	USoundCue* FireStartSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Audio")
+	USoundCue* FireEndSound;
 
 public:
 
