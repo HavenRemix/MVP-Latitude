@@ -11,6 +11,9 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Math/Vector.h"
+#include "GameFramework/Pawn.h"
+#include "Sound/SoundCue.h"
+#include "Kismet/GameplayStatics.h"
 
 
 
@@ -336,4 +339,23 @@ void ASCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 
 	DOREPLIFETIME(ASCharacter, CurrentWeapon);
 	DOREPLIFETIME(ASCharacter, bDied);
+}
+
+
+void ASCharacter::PlaySong(float WhichSong)
+{
+	if (IsLocallyControlled())
+	{
+		if (WhichSong == 1)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, SongOne, GetActorLocation());
+		}
+		else if (WhichSong == 2)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, SongTwo, GetActorLocation());
+		}
+		else {
+			UGameplayStatics::PlaySoundAtLocation(this, SongOne, GetActorLocation());
+		}
+	}
 }

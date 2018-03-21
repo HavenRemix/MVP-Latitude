@@ -11,6 +11,7 @@ class ASWeapon;
 class USHealthComponent;
 class USkeletalMeshComponent;
 class AActor;
+class USoundCue;
 
 UCLASS()
 class COOPGAME_API ASCharacter : public ACharacter
@@ -121,8 +122,19 @@ public:
 	virtual FVector GetPawnViewLocation() const override;
 
 	UFUNCTION(BlueprintCallable, Category = "Player")
-		void StartFire();
+	void StartFire();
 
 	UFUNCTION(BlueprintCallable, Category = "Player")
-		void StopFire();
+	void StopFire();
+
+// -------------------------------------------------------------- \\
+
+	UFUNCTION(Exec)
+	void PlaySong(float WhichSong);
+
+	UPROPERTY(EditDefaultsOnly)
+		USoundCue* SongOne;
+
+	UPROPERTY(EditDefaultsOnly)
+		USoundCue* SongTwo;
 };
