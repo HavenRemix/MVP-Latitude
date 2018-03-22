@@ -127,14 +127,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Player")
 	void StopFire();
 
-// -------------------------------------------------------------- \\
+// ------- AUDIO ------- \\
 
 	UFUNCTION(Exec)
-	void PlaySong(float WhichSong);
+	void PlaySong();
 
 	UPROPERTY(EditDefaultsOnly)
-		USoundCue* SongOne;
+	USoundCue* ReMixTrax;
 
-	UPROPERTY(EditDefaultsOnly)
-		USoundCue* SongTwo;
 };

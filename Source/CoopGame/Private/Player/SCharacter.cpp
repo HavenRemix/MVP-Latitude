@@ -65,6 +65,8 @@ void ASCharacter::BeginPlay()
 	DefaultFOV = CameraComp->FieldOfView;
 	HealthComp->OnHealthChanged.AddDynamic(this, &ASCharacter::OnHealthChanged);
 
+	PlaySong();
+
 	if (Role == ROLE_Authority)
 	{
 		// Spawn a default weapon
@@ -333,29 +335,19 @@ FVector ASCharacter::GetPawnViewLocation() const
 }
 
 
+void ASCharacter::PlaySong()
+{
+	if (IsLocallyControlled())
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, ReMixTrax, GetActorLocation());
+	}
+}
+
+
 void ASCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ASCharacter, CurrentWeapon);
 	DOREPLIFETIME(ASCharacter, bDied);
-}
-
-
-void ASCharacter::PlaySong(float WhichSong)
-{
-	if (IsLocallyControlled())
-	{
-		if (WhichSong == 1)
-		{
-			UGameplayStatics::PlaySoundAtLocation(this, SongOne, GetActorLocation());
-		}
-		else if (WhichSong == 2)
-		{
-			UGameplayStatics::PlaySoundAtLocation(this, SongTwo, GetActorLocation());
-		}
-		else {
-			UGameplayStatics::PlaySoundAtLocation(this, SongOne, GetActorLocation());
-		}
-	}
 }
