@@ -132,7 +132,7 @@ void USGameInstance::CreateSession()
 			else {
 				SessionSettings.bIsLANMatch = false;
 			}
-			SessionSettings.NumPublicConnections = 4;
+			SessionSettings.NumPublicConnections = 12;
 			SessionSettings.bShouldAdvertise = true;
 			SessionSettings.bUsesPresence = true;
 			SessionSettings.Set(SERVER_NAME_SETTINGS_KEY, DesiredServerName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
