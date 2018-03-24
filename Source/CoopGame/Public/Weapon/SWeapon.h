@@ -21,11 +21,12 @@ struct FHitScanTrace
 public:
 
 	UPROPERTY()
-		TEnumAsByte<EPhysicalSurface> SurfaceType;
+	TEnumAsByte<EPhysicalSurface> SurfaceType;
 
 	UPROPERTY()
-		FVector_NetQuantize TraceTo;
+	FVector_NetQuantize TraceTo;
 };
+
 
 UCLASS()
 class COOPGAME_API ASWeapon : public AActor
@@ -40,70 +41,95 @@ protected:
 
 	virtual void BeginPlay() override;
 
+
+// ------- COMPONENTS ------- \\
+
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USkeletalMeshComponent* MeshComp;
+
+
+// ------- FUNCTIONS ------- \\
+
+
 	void PlayFireEffects(FVector TraceEnd);
 
 	void PlayImpactEffects(EPhysicalSurface SurfaceType, FVector ImpactPoint);
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Trinity")
-		TSubclassOf<UDamageType> DamageType;
-
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Trinity")
-		FName MuzzleSocketName;
-
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Trinity")
-		FName TracerTargetName;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Trinity")
-		UParticleSystem* MuzzleEffect;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Trinity")
-		UParticleSystem* DefaultImpactEffect;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Trinity")
-		UParticleSystem* FleshImpactEffect;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Trinity")
-		UParticleSystem* TracerEffect;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Trinity")
-		TSubclassOf<UCameraShake> FireCamShake;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Trinity")
-		float BaseDamage;
-
 	void Fire();
 
 	UFUNCTION(BlueprintImplementableEvent)
-		void SpawnProjectile();
+	void SpawnProjectile();
+
+
+// ------- SERVER FUNCTIONS ------- \\
+
 
 	UFUNCTION(Server, Reliable, WithValidation)
-		void ServerFire();
-
-	FTimerHandle TimerHandle_TimeBetweenShots;
-
-	float LastFireTime;
-
-	/* RPM - Bullets per minute fired by weapon */
-	UPROPERTY(EditDefaultsOnly, Category = "Trinity")
-		float RateOfFire;
-
-	/* Bullet Spread in Degrees */
-	UPROPERTY(EditDefaultsOnly, Category = "Trinity", meta = (ClampMin = 0.0f))
-		float BulletSpread;
-
-	// Derived from RateOfFire
-	float TimeBetweenShots;
-
-	UPROPERTY(ReplicatedUsing = OnRep_HitScanTrace)
-		FHitScanTrace HitScanTrace;
+	void ServerFire();
 
 	UFUNCTION()
 	void OnRep_HitScanTrace();
 
+// ------- EMMITERS ------- \\
+
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Trinity")
+	UParticleSystem* MuzzleEffect;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Trinity")
+	UParticleSystem* DefaultImpactEffect;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Trinity")
+	UParticleSystem* FleshImpactEffect;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Trinity")
+	UParticleSystem* TracerEffect;
+
+
+// ------- VARIABLES ------- \\
+
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Trinity")
+	FName MuzzleSocketName;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Trinity")
+	FName TracerTargetName;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Trinity")
+	float BaseDamage;
+
+	float LastFireTime;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Trinity")
+	float RateOfFire;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Trinity", meta = (ClampMin = 0.0f))
+	float BulletSpread;
+
+	float TimeBetweenShots;
+
 	UPROPERTY(EditDefaultsOnly)
 	bool bIsProjectile;
 
-// ------- AUDIO ------- \
+
+// ------- REFERENCES ------- \\
+
+
+	UPROPERTY(EditDefaultsOnly, Category = "Trinity")
+	TSubclassOf<UCameraShake> FireCamShake;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Trinity")
+	TSubclassOf<UDamageType> DamageType;
+
+	FTimerHandle TimerHandle_TimeBetweenShots;
+
+	UPROPERTY(ReplicatedUsing = OnRep_HitScanTrace)
+	FHitScanTrace HitScanTrace;
+
+
+// ------- AUDIO ------- \\
+
 
 	UPROPERTY(EditDefaultsOnly, Category = "Audio")
 	USoundCue* FireStartSound;
@@ -117,9 +143,10 @@ public:
 
 	void StopFire();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-		UCameraComponent* ADSCameraComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-		USkeletalMeshComponent* MeshComp;
+// ------- EXTRA ------- \\
+
+
+	UFUNCTION()
+	bool IsTargeting(bool WasTargeting);
 };

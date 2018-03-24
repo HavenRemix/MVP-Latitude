@@ -6,6 +6,7 @@
 #include "Runtime/SGameState.h"
 #include "Player/SPlayerState.h"
 #include "TimerManager.h"
+#include "Player/SPlayerController.h"
 
 
 

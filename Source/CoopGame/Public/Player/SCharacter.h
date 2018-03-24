@@ -12,6 +12,7 @@ class USHealthComponent;
 class USkeletalMeshComponent;
 class AActor;
 class USoundCue;
+class ASPlayerController;
 
 UCLASS()
 class COOPGAME_API ASCharacter : public ACharacter
@@ -64,22 +65,19 @@ protected:
 	float DefaultFOV;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Weapons")
-		bool bWantsToZoom;
-
-	UPROPERTY(BlueprintReadWrite, Category = "Weapons")
-		bool bIsRunning;
+	bool bIsRunning;
 
 	UPROPERTY(EditDefaultsOnly, Category = "AI")
-		bool bIsAI;
+	bool bIsAI;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Player")
-		float ZoomedFOV;
+	float ZoomedFOV;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Player", meta = (ClampMin = 0.1, ClampMax = 100))
-		float ZoomInterpSpeed;
+	float ZoomInterpSpeed;
 
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Player")
-		bool bDied;
+	bool bDied;
 
 // ------- EXTERNALS ------- \\
 
@@ -87,21 +85,18 @@ protected:
 //Weapon
 
 	UPROPERTY(Replicated)
-		ASWeapon* CurrentWeapon;
+	ASWeapon* CurrentWeapon;
 
 	uint16 WeaponNum;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Weapon")
-		FName WeaponAttachSocketName;
+	FName WeaponAttachSocketName;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-		TSubclassOf<ASWeapon> RifleClass;
+	TSubclassOf<ASWeapon> RifleClass;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-		TSubclassOf<ASWeapon> TrinityClass;
-
-	UFUNCTION(BlueprintPure)
-		bool IsTargeting(bool WasTargeting);
+	TSubclassOf<ASWeapon> TrinityClass;
 
 	void EquipWeapon(uint16 WeaponNumber);
 
@@ -115,6 +110,7 @@ protected:
 
 
 public:
+
 
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -135,4 +131,8 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	USoundCue* ReMixTrax;
 
+// ------- VARIABLES ------- \\
+
+	UPROPERTY(BlueprintReadWrite, Category = "Weapons")
+	bool bWantsToZoom;
 };

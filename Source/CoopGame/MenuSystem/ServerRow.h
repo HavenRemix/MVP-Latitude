@@ -2,10 +2,6 @@
 
 #pragma once
 
-#include "Components/TextBlock.h"
-#include "Components/Button.h"
-
-
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "ServerRow.generated.h"
@@ -17,25 +13,30 @@ UCLASS()
 class COOPGAME_API UServerRow : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
 public:
 
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* ServerName;
-	
-	UFUNCTION()
-	void Setup(class UMainMenu* InParent, uint32 InIndex);
+
+	UPROPERTY(BlueprintReadOnly)
+	bool Selected = false;
+
+	void Setup(class UMainMenu* Parent, uint32 Index);
 
 private:
+
+// ------- COMPONENTS ------- \\
 
 	UPROPERTY(meta = (BindWidget))
 	class UButton* RowButton;
 
-	uint32 Index;
-
 	UPROPERTY()
 	class UMainMenu* Parent;
+	
+	uint32 Index;
 
 	UFUNCTION()
 	void OnClicked();
+
 };

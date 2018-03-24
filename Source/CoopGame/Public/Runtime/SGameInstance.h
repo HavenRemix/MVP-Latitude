@@ -3,7 +3,7 @@
 #pragma once
 
 #include "MenuSystem/MenuInterface.h"
-
+#include "MenuSystem/MainMenu.h"
 
 #include "CoreMinimal.h"
 #include "OnlineSessionInterface.h"
@@ -21,44 +21,19 @@ class COOPGAME_API USGameInstance : public UGameInstance, public IMenuInterface
 {
 	GENERATED_BODY()
 
-private:
-
-	TSubclassOf<class UUserWidget> MenuClass;
-
-	class UMainMenu* Menu;
-
-	FString DesiredServerName;
-
-//------- MULTIPLAYER ------- \\
-
-
-	IOnlineSessionPtr SessionInterface;
-	TSharedPtr<class FOnlineSessionSearch> SessionSearch;
-
-	UFUNCTION()
-	void OnCreateSessionComplete(FName SessionName, bool Success);
-
-	UFUNCTION()
-	void OnDestroySessionComplete(FName SessionName, bool Success);
-
-	UFUNCTION()
-	void OnFindSessionComplete(bool Success);
-
-	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
-
-	void CreateSession();
-
 public:
 
 	USGameInstance(const FObjectInitializer & ObjectInitializer);
+	
 	virtual void Init();
 
+// ------- FUNCTIONS ------- \\
+
 	UFUNCTION(BlueprintCallable)
-	void LoadMainMenu();
+	void LoadMenuWidget();
 
-
-//------- MULTIPLAYER ------- \\
-
+	UFUNCTION(BlueprintCallable)
+	void InGameLoadMenu();
 
 	UFUNCTION(Exec)
 	void Host(FString ServerName) override;
@@ -66,7 +41,29 @@ public:
 	UFUNCTION(Exec)
 	void Join(uint32 Index) override;
 
-	UFUNCTION()
+	void StartSession();
+
+	virtual void LoadMainMenu() override;
+
 	void RefreshServerList() override;
 
+private:
+
+	TSubclassOf<class UUserWidget> MenuClass;
+	TSubclassOf<class UUserWidget> InGameMenuClass;
+
+	class UMainMenu* Menu;
+
+	IOnlineSessionPtr SessionInterface;
+	TSharedPtr<class FOnlineSessionSearch> SessionSearch;
+
+	FString DesiredServerName;
+	void CreateSession();
+
+// ------- CALLBACK DELEGATES FOR SESSION INTERFACE ------- \\
+
+	void OnCreateSessionComplete(FName SessionName, bool Success);
+	void OnDestroySessionComplete(FName SessionName, bool Success);
+	void OnFindSessionsComplete(bool Success);
+	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 };

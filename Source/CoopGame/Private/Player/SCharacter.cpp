@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Player/SCharacter.h"
+#include "Player/SPlayerController.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -155,7 +156,7 @@ void ASCharacter::EndCrouch()
 
 void ASCharacter::Zoom()
 {
-	IsTargeting(bWantsToZoom);
+	CurrentWeapon->IsTargeting(bWantsToZoom);
 }
 
 
@@ -163,7 +164,7 @@ void ASCharacter::BeginRun()
 {
 	if (bWantsToZoom)
 	{
-		IsTargeting(bWantsToZoom);
+		CurrentWeapon->IsTargeting(bWantsToZoom);
 		GetCharacterMovement()->MaxWalkSpeed = 1000;
 	}
 	else {
@@ -201,39 +202,6 @@ void ASCharacter::StopFire()
 
 
 // ------- WEAPON LOGIC ------- \\
-
-
-bool ASCharacter::IsTargeting(bool WasTargeting)
-{
-	if (WasTargeting)
-	{
-		//Not Target Any More
-
-		GetCharacterMovement()->MaxWalkSpeed = 600;
-
-		FPSMesh->SetOwnerNoSee(false);
-		FPSMesh->SetOnlyOwnerSee(true);
-
-		bWantsToZoom = false;
-
-		return false;
-	}
-	else
-	{
-		//Start To Target
-
-		GetCharacterMovement()->MaxWalkSpeed = 300;
-
-		FPSMesh->SetOwnerNoSee(true);
-		FPSMesh->SetOnlyOwnerSee(true);
-
-		bWantsToZoom = true;
-
-		return true;
-	}
-
-	return false;
-}
 
 
 void ASCharacter::EquipWeapon(uint16 WeaponNumber)
@@ -316,10 +284,11 @@ void ASCharacter::OnHealthChanged(USHealthComponent* OwningHealthComp, float Hea
 
 		GetMovementComponent()->StopMovementImmediately();
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
 		DetachFromControllerPendingDestroy();
-
 		SetLifeSpan(10.0f);
+
+		class ASPlayerController* PC = Cast<ASPlayerController>(GetController());
+		PC->RespawnPlayer(5.0f, false);
 	}
 }
 

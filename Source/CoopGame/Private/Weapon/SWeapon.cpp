@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Weapon/SWeapon.h"
+#include "Player/SCharacter.h"
 
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
@@ -12,6 +13,7 @@
 #include "TimerManager.h"
 #include "Net/UnrealNetwork.h"
 #include "Sound/SoundCue.h"
+#include "GameFramework/Character.h"
 
 
 static int32 DebugWeaponDrawing = 0;
@@ -22,13 +24,9 @@ FAutoConsoleVariableRef CVARDebugWeaponDrawing(
 	ECVF_Cheat);
 
 
-// Sets default values
+
 ASWeapon::ASWeapon()
 {
-
-	ADSCameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("AimCamera"));
-	ADSCameraComp->SetupAttachment(MeshComp);
-
 //Defaults
 
 	MeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MeshComp"));
@@ -58,6 +56,9 @@ void ASWeapon::BeginPlay()
 }
 
 
+// ------- FUNCTIONS ------- \\
+
+
 void ASWeapon::Fire()
 {
 	// Trace the world, from pawn eyes to crosshair location
@@ -69,7 +70,7 @@ void ASWeapon::Fire()
 
 	if (!bIsProjectile)
 	{
-		AActor* MyOwner = GetOwner();
+		auto MyOwner = GetOwner();
 		if (MyOwner)
 		{
 			//Play Start Sound
@@ -150,26 +151,6 @@ void ASWeapon::Fire()
 }
 
 
-void ASWeapon::OnRep_HitScanTrace()
-{
-	// Play cosmetic FX
-	PlayFireEffects(HitScanTrace.TraceTo);
-	PlayImpactEffects(HitScanTrace.SurfaceType, HitScanTrace.TraceTo);
-}
-
-
-void ASWeapon::ServerFire_Implementation()
-{
-	Fire();
-}
-
-
-bool ASWeapon::ServerFire_Validate()
-{
-	return true;
-}
-
-
 void ASWeapon::StartFire()
 {
 	float FirstDelay = FMath::Max(LastFireTime + TimeBetweenShots - GetWorld()->TimeSeconds, 0.0f);
@@ -240,6 +221,29 @@ void ASWeapon::PlayImpactEffects(EPhysicalSurface SurfaceType, FVector ImpactPoi
 }
 
 
+// ------- SERVER FUNCTIONS ------- \\
+
+
+void ASWeapon::OnRep_HitScanTrace()
+{
+	// Play cosmetic FX
+	PlayFireEffects(HitScanTrace.TraceTo);
+	PlayImpactEffects(HitScanTrace.SurfaceType, HitScanTrace.TraceTo);
+}
+
+
+void ASWeapon::ServerFire_Implementation()
+{
+	Fire();
+}
+
+
+bool ASWeapon::ServerFire_Validate()
+{
+	return true;
+}
+
+
 void ASWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -247,3 +251,35 @@ void ASWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 	DOREPLIFETIME_CONDITION(ASWeapon, HitScanTrace, COND_SkipOwner);
 }
 
+
+// ------- EXTRA ------- \\
+
+
+bool ASWeapon::IsTargeting(bool WasTargeting)
+{
+	ASCharacter* MyOwner = Cast<ASCharacter>(GetOwner());
+	if (!ensure(MyOwner != nullptr)) return false;
+
+	if (WasTargeting)
+	{
+		//Not Target Any More
+
+		MyOwner->GetCharacterMovement()->MaxWalkSpeed = 600;
+
+		MyOwner->bWantsToZoom = false;
+
+		return false;
+	}
+	else
+	{
+		//Start To Target
+
+		MyOwner->GetCharacterMovement()->MaxWalkSpeed = 300;
+
+		MyOwner->bWantsToZoom = true;
+
+		return true;
+	}
+
+	return false;
+}
