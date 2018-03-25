@@ -37,6 +37,7 @@ ASWeapon::ASWeapon()
 	BaseDamage = 20.0f;
 	DefaultBulletSpread = 2.0f;
 	AimBulletSpread = 0.0f;
+	BulletSpread = DefaultBulletSpread;
 
 	RateOfFire = 600;
 
