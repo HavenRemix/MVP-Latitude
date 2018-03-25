@@ -35,7 +35,9 @@ ASWeapon::ASWeapon()
 	TracerTargetName = "Target";
 
 	BaseDamage = 20.0f;
-	BulletSpread = 2.0f;
+	DefaultBulletSpread = 2.0f;
+	AimBulletSpread = 0.0f;
+
 	RateOfFire = 600;
 
 	SetReplicates(true);
@@ -250,6 +252,7 @@ void ASWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 	DOREPLIFETIME_CONDITION(ASWeapon, HitScanTrace, COND_SkipOwner);
 }
 
+
 // ------- EXTRA ------- \\
 
 
@@ -261,20 +264,20 @@ bool ASWeapon::IsTargeting(bool WasTargeting)
 	if (WasTargeting)
 	{
 		//Not Target Any More
-
 		MyOwner->GetCharacterMovement()->MaxWalkSpeed = 600;
-
 		MyOwner->bWantsToZoom = false;
+
+		BulletSpread = DefaultBulletSpread;
 
 		return false;
 	}
 	else
 	{
 		//Start To Target
-
 		MyOwner->GetCharacterMovement()->MaxWalkSpeed = 300;
-
 		MyOwner->bWantsToZoom = true;
+
+		BulletSpread = AimBulletSpread;
 
 		return true;
 	}

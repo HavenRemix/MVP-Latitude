@@ -9,22 +9,12 @@
 
 USHealthComponent::USHealthComponent()
 {
-	PrimaryActorTick.bCanEverTick = true;
-
 	DefaultHealth = 100;
 	bIsDead = false;
 
 	TeamNum = 255;
 
 	SetIsReplicated(true);
-}
-
-
-void USHealthComponent::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-
 }
 
 

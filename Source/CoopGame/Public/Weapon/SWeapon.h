@@ -57,13 +57,18 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Trinity")
 	FName TracerTargetName;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Trinity")
+	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
 	float BaseDamage;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Trinity")
+	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
 	float RateOfFire;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Trinity", meta = (ClampMin = 0.0f))
+	UPROPERTY(EditDefaultsOnly, Category = "Projectile", meta = (ClampMin = 0.0f))
+	float AimBulletSpread;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Projectile", meta = (ClampMin = 0.0f))
+	float DefaultBulletSpread;
+
 	float BulletSpread;
 
 	UPROPERTY(EditDefaultsOnly)
