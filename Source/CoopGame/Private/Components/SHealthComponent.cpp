@@ -6,9 +6,11 @@
 #include "Net/UnrealNetwork.h"
 
 
-// Sets default values for this component's properties
+
 USHealthComponent::USHealthComponent()
 {
+	PrimaryActorTick.bCanEverTick = true;
+
 	DefaultHealth = 100;
 	bIsDead = false;
 
@@ -18,7 +20,14 @@ USHealthComponent::USHealthComponent()
 }
 
 
-// Called when the game starts
+void USHealthComponent::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+
+}
+
+
 void USHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();

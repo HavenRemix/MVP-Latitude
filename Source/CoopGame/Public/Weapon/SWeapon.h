@@ -6,11 +6,6 @@
 #include "GameFramework/Actor.h"
 #include "SWeapon.generated.h"
 
-class USkeletalMeshComponent;
-class UDamageType;
-class UParticleSystem;
-class UCameraComponent;
-class USoundCue;
 
 // Contains information of a single hitscan weapon linetrace
 USTRUCT()
@@ -37,58 +32,24 @@ public:
 
 	ASWeapon();
 
+	virtual void StartFire();
+	virtual void StopFire();
+
+// ------- EXTRA ------- \\
+
+	UFUNCTION()
+	virtual bool IsTargeting(bool WasTargeting);
+
 protected:
 
 	virtual void BeginPlay() override;
 
-
 // ------- COMPONENTS ------- \\
 
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-	USkeletalMeshComponent* MeshComp;
+	class USkeletalMeshComponent* MeshComp;
 
-
-// ------- FUNCTIONS ------- \\
-
-
-	void PlayFireEffects(FVector TraceEnd);
-
-	void PlayImpactEffects(EPhysicalSurface SurfaceType, FVector ImpactPoint);
-
-	void Fire();
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void SpawnProjectile();
-
-
-// ------- SERVER FUNCTIONS ------- \\
-
-
-	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerFire();
-
-	UFUNCTION()
-	void OnRep_HitScanTrace();
-
-// ------- EMMITERS ------- \\
-
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Trinity")
-	UParticleSystem* MuzzleEffect;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Trinity")
-	UParticleSystem* DefaultImpactEffect;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Trinity")
-	UParticleSystem* FleshImpactEffect;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Trinity")
-	UParticleSystem* TracerEffect;
-
-
-// ------- VARIABLES ------- \\
-
+// ------- VARIBLES ------- \\
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Trinity")
 	FName MuzzleSocketName;
@@ -99,54 +60,70 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Trinity")
 	float BaseDamage;
 
-	float LastFireTime;
-
 	UPROPERTY(EditDefaultsOnly, Category = "Trinity")
 	float RateOfFire;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Trinity", meta = (ClampMin = 0.0f))
 	float BulletSpread;
 
-	float TimeBetweenShots;
-
 	UPROPERTY(EditDefaultsOnly)
 	bool bIsProjectile;
 
+	float LastFireTime;
+
+	float TimeBetweenShots;
+
+// ------- FUNCTIONS ------- \\
+
+	void PlayFireEffects(FVector TraceEnd);
+
+	void PlayImpactEffects(EPhysicalSurface SurfaceType, FVector ImpactPoint);
+
+	void Fire();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void SpawnProjectile();
+
+// ------- SERVER FUNCTIONS ------- \\
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerFire();
+
+	UFUNCTION()
+	void OnRep_HitScanTrace();
+
+// ------- AUDIO ------- \\
+
+	UPROPERTY(EditDefaultsOnly, Category = "Audio")
+	class USoundCue* FireStartSound;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Audio")
+	class USoundCue* FireEndSound;
 
 // ------- REFERENCES ------- \\
 
+	UPROPERTY(ReplicatedUsing = OnRep_HitScanTrace)
+	FHitScanTrace HitScanTrace;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Trinity")
-	TSubclassOf<UCameraShake> FireCamShake;
+	TSubclassOf<class UCameraShake> FireCamShake;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Trinity")
 	TSubclassOf<UDamageType> DamageType;
 
 	FTimerHandle TimerHandle_TimeBetweenShots;
 
-	UPROPERTY(ReplicatedUsing = OnRep_HitScanTrace)
-	FHitScanTrace HitScanTrace;
+// ------- EMMITERS ------- \\
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Trinity")
+	class UParticleSystem* MuzzleEffect;
 
-// ------- AUDIO ------- \\
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Trinity")
+	class UParticleSystem* DefaultImpactEffect;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Trinity")
+	class UParticleSystem* FleshImpactEffect;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Audio")
-	USoundCue* FireStartSound;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Audio")
-	USoundCue* FireEndSound;
-
-public:
-
-	void StartFire();
-
-	void StopFire();
-
-
-// ------- EXTRA ------- \\
-
-
-	UFUNCTION()
-	bool IsTargeting(bool WasTargeting);
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Trinity")
+	class UParticleSystem* TracerEffect;
 };

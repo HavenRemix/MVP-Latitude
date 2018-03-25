@@ -50,13 +50,13 @@ protected:
 
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-		UCameraComponent* CameraComp;
+	UCameraComponent* CameraComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-		USkeletalMeshComponent* FPSMesh;
+	USkeletalMeshComponent* FPSMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-		USHealthComponent* HealthComp;
+	USHealthComponent* HealthComp;
 
 
 // ------- VARIABLES ------- \\
@@ -87,18 +87,15 @@ protected:
 	UPROPERTY(Replicated)
 	ASWeapon* CurrentWeapon;
 
-	uint16 WeaponNum;
+	int WeaponNum;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	TArray<TSubclassOf<ASWeapon>> Weapons;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Weapon")
 	FName WeaponAttachSocketName;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-	TSubclassOf<ASWeapon> RifleClass;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-	TSubclassOf<ASWeapon> TrinityClass;
-
-	void EquipWeapon(uint16 WeaponNumber);
+	void EquipWeapon(TSubclassOf<ASWeapon> Weapon);
 
 	void NextWeaponInput();
 	void PreviousWeaponInput();
@@ -106,7 +103,7 @@ protected:
 //Health
 
 	UFUNCTION()
-		void OnHealthChanged(USHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+	void OnHealthChanged(USHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
 
 public:

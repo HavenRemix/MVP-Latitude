@@ -24,10 +24,9 @@ FAutoConsoleVariableRef CVARDebugWeaponDrawing(
 	ECVF_Cheat);
 
 
-
 ASWeapon::ASWeapon()
 {
-//Defaults
+	//Defaults
 
 	MeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MeshComp"));
 	RootComponent = MeshComp;
@@ -251,7 +250,6 @@ void ASWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetime
 	DOREPLIFETIME_CONDITION(ASWeapon, HitScanTrace, COND_SkipOwner);
 }
 
-
 // ------- EXTRA ------- \\
 
 
@@ -283,3 +281,4 @@ bool ASWeapon::IsTargeting(bool WasTargeting)
 
 	return false;
 }
+

@@ -18,6 +18,8 @@ public:
 
 	USHealthComponent();
 
+	virtual void Tick(float DeltaTime) override;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HealthComponent")
 	uint8 TeamNum;
 

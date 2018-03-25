@@ -15,6 +15,8 @@
 #include "GameFramework/Pawn.h"
 #include "Sound/SoundCue.h"
 #include "Kismet/GameplayStatics.h"
+#include "Containers/Array.h"
+#include "Math/UnrealMathUtility.h"
 
 
 
@@ -68,26 +70,7 @@ void ASCharacter::BeginPlay()
 
 	PlaySong();
 
-	if (Role == ROLE_Authority)
-	{
-		// Spawn a default weapon
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-		CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(RifleClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
-		if (CurrentWeapon)
-		{
-			if (bIsAI)
-			{
-				CurrentWeapon->SetOwner(this);
-				CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
-			}
-			else {
-				CurrentWeapon->SetOwner(this);
-				CurrentWeapon->AttachToComponent(FPSMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
-			}
-		}
-	}
+	EquipWeapon(Weapons[0]);
 }
 
 
@@ -122,6 +105,9 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 	PlayerInputComponent->BindAction("Run", IE_Pressed, this, &ASCharacter::BeginRun);
 	PlayerInputComponent->BindAction("Run", IE_Released, this, &ASCharacter::EndRun);
+
+	PlayerInputComponent->BindAction("NextWeapon", IE_Pressed, this, &ASCharacter::NextWeaponInput);
+	PlayerInputComponent->BindAction("PreviousWeapon", IE_Released, this, &ASCharacter::PreviousWeaponInput);
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 }
@@ -204,7 +190,7 @@ void ASCharacter::StopFire()
 // ------- WEAPON LOGIC ------- \\
 
 
-void ASCharacter::EquipWeapon(uint16 WeaponNumber)
+void ASCharacter::EquipWeapon(TSubclassOf<ASWeapon> Weapon)
 {
 	if (Role == ROLE_Authority)
 	{
@@ -213,29 +199,12 @@ void ASCharacter::EquipWeapon(uint16 WeaponNumber)
 			CurrentWeapon->Destroy();
 		}
 
-		// Spawn a weapon
+		//Spawn Rules
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-		//Switch to spawn a different weapon each change
-		TSubclassOf<ASWeapon> WeaponToEquip;
-		switch (WeaponNumber)
-		{
-		case 1:
-			WeaponToEquip = RifleClass;
-			break;
-
-		case 2:
-			WeaponToEquip = TrinityClass;
-			break;
-
-		default:
-			WeaponToEquip = TrinityClass;
-			break;
-		}
-
 		//Set Current Weapon
-		CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(WeaponToEquip, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+		CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(Weapon, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
 
 		//Attach the weapon to the socket
 		if (CurrentWeapon)
@@ -256,13 +225,17 @@ void ASCharacter::EquipWeapon(uint16 WeaponNumber)
 
 void ASCharacter::NextWeaponInput()
 {
-	EquipWeapon(2);
+	int Num = WeaponNum + 1;
+	EquipWeapon(Weapons[Num]);
 }
 
 
 void ASCharacter::PreviousWeaponInput()
 {
-	EquipWeapon(1);
+	int Num = WeaponNum - 1;
+	Num = FMath::Clamp(Num - 1, 0, 2);
+
+	EquipWeapon(Weapons[Num]);
 }
 
 
