@@ -11,10 +11,10 @@ void ALobbyDeathmatchGameMode::PostLogin(APlayerController* NewPlayer)
 
 	++NumberOfPlayers;
 
-//	if (NumberOfPlayers <= 12)
-//	{
+	if (NumberOfPlayers >= 8)
+	{
 		GetWorldTimerManager().SetTimer(TimerHandle_Countdown, this, &ALobbyDeathmatchGameMode::JoinPlayers, 5.0f);
-//	}
+	}
 }
 
 
@@ -25,11 +25,12 @@ void ALobbyDeathmatchGameMode::Logout(AController* Existing)
 	--NumberOfPlayers;
 }
 
+
 void ALobbyDeathmatchGameMode::JoinPlayers()
 {
 	UWorld* World = GetWorld();
 	if (!ensure(World != nullptr)) return;
 
 	bUseSeamlessTravel = true;
-	World->ServerTravel("/Game/Maps/Deathmatch/DM_Outpost?listen");
+	World->ServerTravel("/Game/Maps/Deathmatch/DM_SwitchArea17");
 }

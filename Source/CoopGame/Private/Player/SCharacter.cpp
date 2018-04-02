@@ -20,18 +20,17 @@
 
 
 
-
 ASCharacter::ASCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	//Camera Comp
+//Camera Comp
 
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->SetupAttachment(RootComponent);
 	CameraComp->bUsePawnControlRotation = true;
 
-	//FPS Mesh
+//FPS Mesh
 
 	FPSMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FirstPersonMesh"));
 	FPSMesh->SetOnlyOwnerSee(true);
@@ -39,13 +38,13 @@ ASCharacter::ASCharacter()
 	FPSMesh->bCastDynamicShadow = false;
 	FPSMesh->CastShadow = false;
 
-	//Default Mesh
+//Default Mesh
 
 	GetMesh()->SetOwnerNoSee(true);
 	GetMesh()->bCastDynamicShadow = false;
 	GetMesh()->CastShadow = false;
 
-	//Defaults
+//Defaults
 
 	GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
 	GetCapsuleComponent()->SetCollisionResponseToChannel(COLLISION_WEAPON, ECR_Ignore);
@@ -109,6 +108,8 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("NextWeapon", IE_Pressed, this, &ASCharacter::NextWeaponInput);
 	PlayerInputComponent->BindAction("PreviousWeapon", IE_Released, this, &ASCharacter::PreviousWeaponInput);
 
+	PlayerInputComponent->BindAction("Reload", IE_Released, this, &ASCharacter::Reload);
+
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 }
 
@@ -171,6 +172,10 @@ void ASCharacter::EndRun()
 
 void ASCharacter::StartFire()
 {
+	if (bIsRunning)
+	{
+		EndRun();
+	}
 	if (CurrentWeapon)
 	{
 		CurrentWeapon->StartFire();
@@ -185,6 +190,16 @@ void ASCharacter::StopFire()
 		CurrentWeapon->StopFire();
 	}
 }
+
+
+void ASCharacter::Reload()
+{
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->ReloadWeapon();
+	}
+}
+
 
 
 // ------- WEAPON LOGIC ------- \\
@@ -293,3 +308,4 @@ void ASCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(ASCharacter, CurrentWeapon);
 	DOREPLIFETIME(ASCharacter, bDied);
 }
+

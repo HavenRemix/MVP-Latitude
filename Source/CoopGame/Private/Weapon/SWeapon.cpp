@@ -34,6 +34,10 @@ ASWeapon::ASWeapon()
 	MuzzleSocketName = "MuzzleSocket";
 	TracerTargetName = "Target";
 
+	CurrentAmmo = 60;
+	MaxAmmo = 540;
+	ClipSize = 60;
+
 	BaseDamage = 20.0f;
 	DefaultBulletSpread = 2.0f;
 	AimBulletSpread = 0.0f;
@@ -75,6 +79,15 @@ void ASWeapon::Fire()
 		auto MyOwner = GetOwner();
 		if (MyOwner)
 		{
+			//Deduce Ammo
+			if (CurrentAmmo > 0)
+			{
+				CurrentAmmo--;
+			}
+			else {
+				return;
+			}
+
 			//Play Start Sound
 			UGameplayStatics::PlaySoundAtLocation(this, FireStartSound, GetActorLocation());
 
@@ -146,10 +159,68 @@ void ASWeapon::Fire()
 		AActor* MyOwner = GetOwner();
 		if (MyOwner)
 		{
+			//Deduce Ammo
+			if (CurrentAmmo > 0)
+			{
+				CurrentAmmo--;
+			}
+			else {
+				return;
+			}
+
+			//Play Sound
 			UGameplayStatics::PlaySoundAtLocation(this, FireStartSound, GetActorLocation());
+
+			//Run Function To Shoot
 			SpawnProjectile();
 		}
 	}
+}
+
+
+void ASWeapon::Reload()
+{
+	if (Role < ROLE_Authority)
+	{
+		ServerReload();
+	}
+
+	int Temp;
+	if (MaxAmmo <= 0)
+	{
+		return;
+	}
+	if (MaxAmmo >= ClipSize)
+	{
+		Temp = ClipSize - CurrentAmmo;
+		CurrentAmmo = ClipSize;
+		MaxAmmo = MaxAmmo - Temp;
+		Temp = 0;
+
+		return;
+	}
+	if (MaxAmmo < ClipSize)
+	{
+		Temp = CurrentAmmo - MaxAmmo;
+		if (Temp <= ClipSize)
+		{
+			CurrentAmmo = CurrentAmmo + MaxAmmo;
+			MaxAmmo = 0;
+			Temp = 0;
+			return;
+		}
+		if (Temp > ClipSize)
+		{
+			MaxAmmo = MaxAmmo - CurrentAmmo;
+			CurrentAmmo = ClipSize;
+		}
+	}
+}
+
+
+void ASWeapon::ReloadWeapon()
+{
+	Reload();
 }
 
 
@@ -241,6 +312,18 @@ void ASWeapon::ServerFire_Implementation()
 
 
 bool ASWeapon::ServerFire_Validate()
+{
+	return true;
+}
+
+
+void ASWeapon::ServerReload_Implementation()
+{
+	Reload();
+}
+
+
+bool ASWeapon::ServerReload_Validate()
 {
 	return true;
 }

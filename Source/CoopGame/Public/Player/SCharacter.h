@@ -27,9 +27,7 @@ protected:
 
 	virtual void BeginPlay() override;
 
-
 // ------- INPUT ------- \\
-
 
 	void MoveForward(float Value);
 
@@ -45,9 +43,7 @@ protected:
 
 	void EndRun();
 
-
 // ------- COMPONENTS ------- \\
-
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UCameraComponent* CameraComp;
@@ -58,9 +54,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USHealthComponent* HealthComp;
 
-
 // ------- VARIABLES ------- \\
-
 
 	float DefaultFOV;
 
@@ -81,16 +75,9 @@ protected:
 
 // ------- EXTERNALS ------- \\
 
-
 //Weapon
 
-	UPROPERTY(Replicated)
-	ASWeapon* CurrentWeapon;
-
 	int WeaponNum;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-	TArray<TSubclassOf<ASWeapon>> Weapons;
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Weapon")
 	FName WeaponAttachSocketName;
@@ -105,20 +92,32 @@ protected:
 	UFUNCTION()
 	void OnHealthChanged(USHealthComponent* OwningHealthComp, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
-
 public:
-
 
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+// ------- EXTERNALS ------- \\
+
+//Weapon
+
+	UPROPERTY(BlueprintReadOnly, Replicated)
+	ASWeapon* CurrentWeapon;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	TArray<TSubclassOf<ASWeapon>> Weapons;
+
+// ------- FUNCTIONS ------- \\
+
 	virtual FVector GetPawnViewLocation() const override;
 
-	UFUNCTION(BlueprintCallable, Category = "Player")
+	UFUNCTION(BlueprintCallable)
 	void StartFire();
 
-	UFUNCTION(BlueprintCallable, Category = "Player")
+	UFUNCTION(BlueprintCallable)
 	void StopFire();
+
+	void Reload();
 
 // ------- AUDIO ------- \\
 

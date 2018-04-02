@@ -16,7 +16,6 @@ USGameInstance::USGameInstance(const FObjectInitializer & ObjectInitializer)
 {
 	ConstructorHelpers::FClassFinder<UUserWidget> MenuBPClass(TEXT("/Game/UI/Menus/WBP_MainMenu"));
 	if (!ensure(MenuBPClass.Class != nullptr)) return;
-
 	MenuClass = MenuBPClass.Class;
 }
 

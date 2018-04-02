@@ -14,7 +14,7 @@ void UMenuWidget::Setup()
 
 	FInputModeUIOnly InputModeData;
 	InputModeData.SetWidgetToFocus(this->TakeWidget());
-	InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+	InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::LockOnCapture);
 
 	PlayerController->SetInputMode(InputModeData);
 

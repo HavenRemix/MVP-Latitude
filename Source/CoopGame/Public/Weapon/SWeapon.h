@@ -35,6 +35,9 @@ public:
 	virtual void StartFire();
 	virtual void StopFire();
 
+	virtual void ReloadWeapon();
+
+
 // ------- EXTRA ------- \\
 
 	UFUNCTION()
@@ -57,6 +60,18 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Trinity")
 	FName TracerTargetName;
 
+	UPROPERTY(EditDefaultsOnly)
+	bool bIsProjectile;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	int CurrentAmmo;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	int MaxAmmo;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	int ClipSize;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
 	float BaseDamage;
 
@@ -71,9 +86,6 @@ protected:
 
 	float BulletSpread;
 
-	UPROPERTY(EditDefaultsOnly)
-	bool bIsProjectile;
-
 	float LastFireTime;
 
 	float TimeBetweenShots;
@@ -86,6 +98,8 @@ protected:
 
 	void Fire();
 
+	void Reload();
+
 	UFUNCTION(BlueprintImplementableEvent)
 	void SpawnProjectile();
 
@@ -93,6 +107,9 @@ protected:
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerFire();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerReload();
 
 	UFUNCTION()
 	void OnRep_HitScanTrace();
