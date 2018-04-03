@@ -194,9 +194,17 @@ void ASCharacter::StopFire()
 
 void ASCharacter::Reload()
 {
+	if (bWantsToZoom)
+	{
+		CurrentWeapon->IsTargeting(bWantsToZoom);
+	}
+	if (bIsRunning)
+	{
+		EndRun();
+	}
 	if (CurrentWeapon)
 	{
-		CurrentWeapon->ReloadWeapon();
+		BPReload();
 	}
 }
 

@@ -35,6 +35,7 @@ public:
 	virtual void StartFire();
 	virtual void StopFire();
 
+	UFUNCTION(BlueprintCallable)
 	virtual void ReloadWeapon();
 
 

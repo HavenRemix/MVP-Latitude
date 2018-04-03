@@ -117,6 +117,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void StopFire();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void BPReload();
+
 	void Reload();
 
 // ------- AUDIO ------- \\
