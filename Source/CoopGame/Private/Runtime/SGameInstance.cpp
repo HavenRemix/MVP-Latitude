@@ -67,7 +67,7 @@ void USGameInstance::OnCreateSessionComplete(FName SessionName, bool Success)
 	UWorld* World = GetWorld();
 	if (!ensure(World != nullptr)) return;
 
-	World->ServerTravel("/Game/Maps/Warmup/Lobby");
+	World->ServerTravel("/Game/Maps/Warmup/Lobby?listen");
 }
 
 
