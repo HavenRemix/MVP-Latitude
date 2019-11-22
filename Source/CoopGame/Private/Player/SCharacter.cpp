@@ -283,8 +283,8 @@ void ASCharacter::OnHealthChanged(USHealthComponent* OwningHealthComp, float Hea
 		DetachFromControllerPendingDestroy();
 		SetLifeSpan(10.0f);
 
-		class ASPlayerController* PC = Cast<ASPlayerController>(GetController());
-		PC->RespawnPlayer(5.0f, false);
+		//class ASPlayerController* PC = Cast<ASPlayerController>(GetController());
+		//PC->RespawnPlayer(5.0f, false);
 	}
 }
 
