@@ -14,6 +14,7 @@ public class CoopGame : ModuleRules
             "Engine",
             "InputCore",
             "UMG",
+            "NavigationSystem",
             "OnlineSubsystem",
             "OnlineSubsystemUtils",
             "OnlineSubsystemSteam"
