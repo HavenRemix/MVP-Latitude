@@ -43,6 +43,10 @@ protected:
 
 	void EndRun();
 
+	void NextWeaponInput();
+
+	void PreviousWeaponInput();
+
 // ------- COMPONENTS ------- \\
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
@@ -55,6 +59,8 @@ protected:
 	USHealthComponent* HealthComp;
 
 // ------- VARIABLES ------- \\
+
+//Player
 
 	float DefaultFOV;
 
@@ -73,19 +79,68 @@ protected:
 	UPROPERTY(Replicated, BlueprintReadOnly, Category = "Player")
 	bool bDied;
 
-// ------- EXTERNALS ------- \\
-
 //Weapon
 
+	UPROPERTY(BlueprintReadOnly, Replicated)
+	ASWeapon* CurrentWeapon;
+
+	UPROPERTY(Replicated)
+	ASWeapon* UnequippedWeapon;
+
+	UPROPERTY(Replicated)
+	ASWeapon* TransactionItem;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	TArray<TSubclassOf<ASWeapon>> Weapons;
+
 	int WeaponNum;
+
+	//Variable to see if the weapon type is a rifle or someting else
+	UPROPERTY(BlueprintReadOnly, Category = "Weapon")
+	bool bHasRifleTypeWeapon;
+
+	//Sockets
 
 	UPROPERTY(VisibleDefaultsOnly, Category = "Weapon")
 	FName WeaponAttachSocketName;
 
-	void EquipWeapon(TSubclassOf<ASWeapon> Weapon);
+	UPROPERTY(VisibleDefaultsOnly, Category = "Weapon")
+	FName WeaponBackAttachSocketName;
 
-	void NextWeaponInput();
-	void PreviousWeaponInput();
+	//Timers
+
+	FTimerHandle TimerHandle_ReloadTimer;
+	FTimerHandle TimerHandle_SwitchTimer;
+
+	//Ammo
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "WeaponConfig")
+	int32 MaxAmmo_Heavy;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "WeaponConfig")
+	int32 MaxAmmo_Medium;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "WeaponConfig")
+	int32 MaxAmmo_Light;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "WeaponConfig")
+	int32 MaxAmmo_Shells;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "WeaponConfig")
+	int32 MaxAmmo_Rockets;
+
+// ------- FUNCTIONS ------- \\
+
+	//TSubclassOf<ASWeapon> Weapon
+
+	void EquipWeapon();
+	void CreateWeapons();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerEquipWeapon();
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerCreateWeapons();
 
 //Health
 
@@ -97,19 +152,27 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-// ------- EXTERNALS ------- \\
+// ------- VARIABLES ------- \\
 
 //Weapon
 
-	UPROPERTY(BlueprintReadOnly, Replicated)
-	ASWeapon* CurrentWeapon;
+	UPROPERTY(BlueprintReadOnly, Category = "Player")
+	bool bWantsToZoom;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-	TArray<TSubclassOf<ASWeapon>> Weapons;
+	UPROPERTY(BlueprintReadOnly, Category = "Online")
+	bool bIsServer;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Player")
+	bool bReloading;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Player")
+	bool bSwitching;
 
 // ------- FUNCTIONS ------- \\
 
 	virtual FVector GetPawnViewLocation() const override;
+
+//Weaposn
 
 	UFUNCTION(BlueprintCallable)
 	void StartFire();
@@ -122,6 +185,8 @@ public:
 
 	void Reload();
 
+	void EndReload();
+
 // ------- AUDIO ------- \\
 
 	UFUNCTION(Exec)
@@ -130,8 +195,14 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	USoundCue* ReMixTrax;
 
-// ------- VARIABLES ------- \\
+private:
 
-	UPROPERTY(BlueprintReadWrite, Category = "Weapons")
-	bool bWantsToZoom;
+	class ASPlayerState* CurrentPlayerState;
+
+// ------- FUNCTION ------- \\
+
+	void FinishAction();
+
+	void SetMaxAmmo_Player(FString TypeOfAmmo, int32 AmmoToSetTo);
+
 };

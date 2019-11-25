@@ -16,14 +16,6 @@
 #include "GameFramework/Character.h"
 
 
-static int32 DebugWeaponDrawing = 0;
-FAutoConsoleVariableRef CVARDebugWeaponDrawing(
-	TEXT("COOP.DebugWeapons"),
-	DebugWeaponDrawing,
-	TEXT("Draw Debug Lines for Weapons"),
-	ECVF_Cheat);
-
-
 ASWeapon::ASWeapon()
 {
 	//Defaults
@@ -65,6 +57,9 @@ void ASWeapon::BeginPlay()
 // ------- FUNCTIONS ------- \\
 
 
+//FIRE
+
+
 void ASWeapon::Fire()
 {
 	// Trace the world, from pawn eyes to crosshair location
@@ -73,109 +68,24 @@ void ASWeapon::Fire()
 	{
 		ServerFire();
 	}
-
-	if (!bIsProjectile)
-	{
-		auto MyOwner = GetOwner();
-		if (MyOwner)
-		{
-			//Deduce Ammo
-			if (CurrentAmmo > 0)
-			{
-				CurrentAmmo--;
-			}
-			else {
-				return;
-			}
-
-			//Play Start Sound
-			UGameplayStatics::PlaySoundAtLocation(this, FireStartSound, GetActorLocation());
-
-			FVector EyeLocation;
-			FRotator EyeRotation;
-			MyOwner->GetActorEyesViewPoint(EyeLocation, EyeRotation);
-
-			FVector ShotDirection = EyeRotation.Vector();
-
-			// Bullet Spread
-			float HalfRad = FMath::DegreesToRadians(BulletSpread);
-			ShotDirection = FMath::VRandCone(ShotDirection, HalfRad, HalfRad);
-
-			FVector TraceEnd = EyeLocation + (ShotDirection * 10000);
-
-			FCollisionQueryParams QueryParams;
-			QueryParams.AddIgnoredActor(MyOwner);
-			QueryParams.AddIgnoredActor(this);
-			QueryParams.bTraceComplex = true;
-			QueryParams.bReturnPhysicalMaterial = true;
-
-			// Particle "Target" parameter
-			FVector TracerEndPoint = TraceEnd;
-
-			EPhysicalSurface SurfaceType = SurfaceType_Default;
-
-			FHitResult Hit;
-			if (GetWorld()->LineTraceSingleByChannel(Hit, EyeLocation, TraceEnd, COLLISION_WEAPON, QueryParams))
-			{
-				// Blocking hit! Process damage
-				AActor* HitActor = Hit.GetActor();
-
-				SurfaceType = UPhysicalMaterial::DetermineSurfaceType(Hit.PhysMaterial.Get());
-
-				float ActualDamage = BaseDamage;
-				if (SurfaceType == SURFACE_FLESHVULNERABLE)
-				{
-					ActualDamage *= 4.0f;
-				}
-
-				UGameplayStatics::ApplyPointDamage(HitActor, ActualDamage, ShotDirection, Hit, MyOwner->GetInstigatorController(), MyOwner, DamageType);
-
-				PlayImpactEffects(SurfaceType, Hit.ImpactPoint);
-
-				TracerEndPoint = Hit.ImpactPoint;
-
-			}
-
-			if (DebugWeaponDrawing > 0)
-			{
-				DrawDebugLine(GetWorld(), EyeLocation, TraceEnd, FColor::White, false, 1.0f, 0, 1.0f);
-			}
-
-			PlayFireEffects(TracerEndPoint);
-
-			if (Role == ROLE_Authority)
-			{
-				HitScanTrace.TraceTo = TracerEndPoint;
-				HitScanTrace.SurfaceType = SurfaceType;
-			}
-
-			LastFireTime = GetWorld()->TimeSeconds;
-
-			//Play End Sound
-			UGameplayStatics::PlaySoundAtLocation(this, FireEndSound, GetActorLocation());
-		}
-	}
-	else {
-		AActor* MyOwner = GetOwner();
-		if (MyOwner)
-		{
-			//Deduce Ammo
-			if (CurrentAmmo > 0)
-			{
-				CurrentAmmo--;
-			}
-			else {
-				return;
-			}
-
-			//Play Sound
-			UGameplayStatics::PlaySoundAtLocation(this, FireStartSound, GetActorLocation());
-
-			//Run Function To Shoot
-			SpawnProjectile();
-		}
-	}
 }
+
+
+void ASWeapon::StartFire()
+{
+	float FirstDelay = FMath::Max(LastFireTime + TimeBetweenShots - GetWorld()->TimeSeconds, 0.0f);
+
+	GetWorldTimerManager().SetTimer(TimerHandle_TimeBetweenShots, this, &ASWeapon::Fire, TimeBetweenShots, true, FirstDelay);
+}
+
+
+void ASWeapon::StopFire()
+{
+	GetWorldTimerManager().ClearTimer(TimerHandle_TimeBetweenShots);
+}
+
+
+//RELOAD
 
 
 void ASWeapon::Reload()
@@ -224,18 +134,35 @@ void ASWeapon::ReloadWeapon()
 }
 
 
-void ASWeapon::StartFire()
-{
-	float FirstDelay = FMath::Max(LastFireTime + TimeBetweenShots - GetWorld()->TimeSeconds, 0.0f);
+//AMMO
 
-	GetWorldTimerManager().SetTimer(TimerHandle_TimeBetweenShots, this, &ASWeapon::Fire, TimeBetweenShots, true, FirstDelay);
+
+void ASWeapon::SetMaxAmmo_Weapon(int32 MaxAmmoFromPlayer_Heavy, int32 MaxAmmoFromPlayer_Medium, int32 MaxAmmoFromPlayer_Light, int32 MaxAmmoFromPlayer_Shells, int32 MaxAmmoFromPlayer_Rockets)
+{
+	if (AmmoTypeUsed == "Heavy")
+	{
+		MaxAmmo = MaxAmmoFromPlayer_Heavy;
+	}
+	else if (AmmoTypeUsed == "Medium")
+	{
+		MaxAmmo = MaxAmmoFromPlayer_Medium;
+	}
+	else if (AmmoTypeUsed == "Light")
+	{
+		MaxAmmo = MaxAmmoFromPlayer_Light;
+	}
+	else if (AmmoTypeUsed == "Shells")
+	{
+		MaxAmmo = MaxAmmoFromPlayer_Shells;
+	}
+	else if (AmmoTypeUsed == "Rockets")
+	{
+		MaxAmmo = MaxAmmoFromPlayer_Rockets;
+	}
 }
 
 
-void ASWeapon::StopFire()
-{
-	GetWorldTimerManager().ClearTimer(TimerHandle_TimeBetweenShots);
-}
+//PARTICE EFFECTS
 
 
 void ASWeapon::PlayFireEffects(FVector TraceEnd)
@@ -297,12 +224,7 @@ void ASWeapon::PlayImpactEffects(EPhysicalSurface SurfaceType, FVector ImpactPoi
 // ------- SERVER FUNCTIONS ------- \\
 
 
-void ASWeapon::OnRep_HitScanTrace()
-{
-	// Play cosmetic FX
-	PlayFireEffects(HitScanTrace.TraceTo);
-	PlayImpactEffects(HitScanTrace.SurfaceType, HitScanTrace.TraceTo);
-}
+//FIRE
 
 
 void ASWeapon::ServerFire_Implementation()
@@ -317,6 +239,9 @@ bool ASWeapon::ServerFire_Validate()
 }
 
 
+//RELOAD
+
+
 void ASWeapon::ServerReload_Implementation()
 {
 	Reload();
@@ -327,6 +252,20 @@ bool ASWeapon::ServerReload_Validate()
 {
 	return true;
 }
+
+
+//PARTICLE EFFECTS
+
+
+void ASWeapon::OnRep_HitScanTrace()
+{
+	// Play cosmetic FX
+	PlayFireEffects(HitScanTrace.TraceTo);
+	PlayImpactEffects(HitScanTrace.SurfaceType, HitScanTrace.TraceTo);
+}
+
+
+//REPLICATION
 
 
 void ASWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

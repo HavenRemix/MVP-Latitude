@@ -32,18 +32,6 @@ public:
 
 	ASWeapon();
 
-	virtual void StartFire();
-	virtual void StopFire();
-
-	UFUNCTION(BlueprintCallable)
-	virtual void ReloadWeapon();
-
-
-// ------- EXTRA ------- \\
-
-	UFUNCTION()
-	virtual bool IsTargeting(bool WasTargeting);
-
 protected:
 
 	virtual void BeginPlay() override;
@@ -63,15 +51,6 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	bool bIsProjectile;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	int CurrentAmmo;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	int MaxAmmo;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	int ClipSize;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
 	float BaseDamage;
@@ -97,12 +76,9 @@ protected:
 
 	void PlayImpactEffects(EPhysicalSurface SurfaceType, FVector ImpactPoint);
 
-	void Fire();
+	virtual void Fire();
 
 	void Reload();
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void SpawnProjectile();
 
 // ------- SERVER FUNCTIONS ------- \\
 
@@ -149,4 +125,41 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Trinity")
 	class UParticleSystem* TracerEffect;
+
+public:
+
+// ------- VARIABLES ------- \\
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	FString AmmoTypeUsed;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "WeaponConfig")
+	int32 CurrentAmmo;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "WeaponConfig")
+	int32 ClipSize;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "WeaponConfig")
+	int32 MaxAmmo;
+
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "WeaponConfig")
+	bool IsAuto;
+
+	bool bIsRifle;
+
+// ------- FUNCTIONS ------- \\
+
+	UFUNCTION()
+	virtual bool IsTargeting(bool WasTargeting);
+
+	virtual void StartFire();
+
+	virtual void StopFire();
+
+	UFUNCTION(BlueprintCallable)
+	virtual void ReloadWeapon();
+
+	void SetButtetSpread(float NewSpread, bool bIsAdvanced, bool bUseDefault);
+
+	void SetMaxAmmo_Weapon(int32 MaxAmmoFromPlayer_Heavy, int32 MaxAmmoFromPlayer_Medium, int32 MaxAmmoFromPlayer_Light, int32 MaxAmmoFromPlayer_Shells, int32 MaxAmmoFromPlayer_Rockets);
 };

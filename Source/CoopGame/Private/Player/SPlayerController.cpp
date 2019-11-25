@@ -4,6 +4,7 @@
 
 #include "TimerManager.h"
 #include "Runtime/InputCore/Classes/InputCoreTypes.h"
+#include "..\..\Public\Player\SPlayerController.h"
 
 
 // ------- FUNCTIONS ------- \\

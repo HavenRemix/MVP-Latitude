@@ -34,6 +34,4 @@ public:
 
 	UFUNCTION()
 	void RespawnPlayer(float WaitingTime, bool HasToClick);
-	
-	
 };

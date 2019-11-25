@@ -7,6 +7,8 @@
 #include "Player/SPlayerState.h"
 #include "TimerManager.h"
 #include "Player/SPlayerController.h"
+#include "..\..\Public\GameMode\ShowdownGameMode.h"
+#include "Runtime/SGameInstance.h"
 
 
 

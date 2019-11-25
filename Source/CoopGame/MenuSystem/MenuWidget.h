@@ -23,5 +23,6 @@ public:
 	void SetMenuInterface(IMenuInterface* MenuInterface);
 
 protected:
+
 	IMenuInterface* MenuInterface;
 };

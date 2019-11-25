@@ -17,6 +17,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Containers/Array.h"
 #include "Math/UnrealMathUtility.h"
+#include "Player/SPlayerState.h"
+#include "..\..\Public\Player\SCharacter.h"
 
 
 
@@ -57,6 +59,7 @@ ASCharacter::ASCharacter()
 	bIsAI = false;
 
 	WeaponAttachSocketName = "WeaponSocket";
+	WeaponBackAttachSocketName = "WeaponBackSocket";
 }
 
 
@@ -69,7 +72,10 @@ void ASCharacter::BeginPlay()
 
 	PlaySong();
 
-	EquipWeapon(Weapons[0]);
+	if (Role >= ROLE_Authority)
+	{
+		CreateWeapons();
+	}
 }
 
 
@@ -209,27 +215,166 @@ void ASCharacter::Reload()
 }
 
 
+void ASCharacter::EndReload()
+{
+	bReloading = false;
+}
+
+
+void ASCharacter::NextWeaponInput()
+{
+	if (WeaponNum == 0)
+	{
+		WeaponNum = 1;
+	}
+	else {
+		WeaponNum = 0;
+	}
+
+	//int Num = WeaponNum + 1;
+	//Weapons[Num]
+	EquipWeapon();
+}
+
+
+void ASCharacter::PreviousWeaponInput()
+{
+	if (WeaponNum == 1)
+	{
+		WeaponNum = 0;
+	}
+	else {
+		WeaponNum = 1;
+	}
+//	int Num = WeaponNum - 1;
+	//Num = FMath::Clamp(Num - 1, 0, 2);
+	//Weapons[Num]
+	EquipWeapon();
+}
+
+
+void ASCharacter::FinishAction()
+{
+	if (TimerHandle_ReloadTimer.IsValid() && CurrentWeapon)
+	{
+		CurrentWeapon->ReloadWeapon();
+		SetMaxAmmo_Player(CurrentWeapon->AmmoTypeUsed, CurrentWeapon->MaxAmmo);
+
+		EndReload();
+		GetWorldTimerManager().ClearTimer(TimerHandle_ReloadTimer);
+	}
+
+	if (TimerHandle_SwitchTimer.IsValid())
+	{
+		bSwitching = false;
+		GetWorldTimerManager().ClearTimer(TimerHandle_SwitchTimer);
+	}
+}
+
 
 // ------- WEAPON LOGIC ------- \\
 
 
-void ASCharacter::EquipWeapon(TSubclassOf<ASWeapon> Weapon)
+//TSubclassOf<ASWeapon> Weapon
+
+//void ASCharacter::EquipWeapon()
+//{
+//	if (Role == ROLE_Authority)
+//	{
+//		if (CurrentWeapon != nullptr)
+//		{
+//			CurrentWeapon->Destroy();
+//		}
+//
+//		//Spawn Rules
+//		FActorSpawnParameters SpawnParams;
+//		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+//
+//		//Set Current Weapon
+//		CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(Weapon, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+//
+//		//Attach the weapon to the socket
+//		if (CurrentWeapon)
+//		{
+//			if (bIsAI)
+//			{
+//				CurrentWeapon->SetOwner(this);
+//				CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
+//			}
+//			else {
+//				CurrentWeapon->SetOwner(this);
+//				CurrentWeapon->AttachToComponent(FPSMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
+//			}
+//		}
+//	}
+//}
+
+
+void ASCharacter::EquipWeapon()
 {
-	if (Role == ROLE_Authority)
+	//Only run if not server
+	if (Role < ROLE_Authority)
 	{
-		if (CurrentWeapon != nullptr)
+		ServerEquipWeapon();
+	}
+
+	//Set the variables to play the animations
+	if (CurrentWeapon && UnequippedWeapon)
+	{
+		bSwitching = true;
+		GetWorldTimerManager().SetTimer(TimerHandle_SwitchTimer, this, &ASCharacter::FinishAction, 0.1f, false, 0.3f);
+	}
+
+	//Only run if the player is the server
+	if (Role >= ROLE_Authority)
+	{
+		//Only run if EquippedItem is valid
+		if (CurrentWeapon)
 		{
-			CurrentWeapon->Destroy();
+			//Attach the CurrentWeapon to the back of the third person mesh
+			CurrentWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponBackAttachSocketName);
+			TransactionItem = CurrentWeapon;
 		}
 
-		//Spawn Rules
+		//Only run if UnequippedItem is valid
+		if (UnequippedWeapon)
+		{
+			UnequippedWeapon->AttachToComponent(FPSMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
+		}
+
+		//Only run if TransactionItem is valid
+		if (TransactionItem)
+		{
+			CurrentWeapon = UnequippedWeapon;
+			UnequippedWeapon = TransactionItem;
+		}
+
+		CurrentWeapon->SetMaxAmmo_Weapon(MaxAmmo_Heavy, MaxAmmo_Medium, MaxAmmo_Light, MaxAmmo_Shells, MaxAmmo_Rockets);
+
+		bHasRifleTypeWeapon = CurrentWeapon->bIsRifle;
+	}
+}
+
+
+void ASCharacter::CreateWeapons()
+{
+	if (Role < ROLE_Authority)
+	{
+		ServerCreateWeapons();
+	}
+
+	if (Role >= ROLE_Authority)
+	{
+		// Spawn a default weapon query parameters
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-		//Set Current Weapon
-		CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(Weapon, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+		CurrentWeapon = GetWorld()->SpawnActor<ASWeapon>(Weapons[0], FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
 
-		//Attach the weapon to the socket
+		UnequippedWeapon = GetWorld()->SpawnActor<ASWeapon>(Weapons[1], FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+
+		//Attach to the first person mesh
+
 		if (CurrentWeapon)
 		{
 			if (bIsAI)
@@ -242,23 +387,87 @@ void ASCharacter::EquipWeapon(TSubclassOf<ASWeapon> Weapon)
 				CurrentWeapon->AttachToComponent(FPSMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
 			}
 		}
+
+		//Attch unequipped item to the back of the player
+
+		if (UnequippedWeapon)
+		{
+			UnequippedWeapon->SetOwner(this);
+			UnequippedWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponBackAttachSocketName);
+		}
+
+		//Set the MaxAmmo variables in the weapon to make sure we get the right information from the beggining
+		if (CurrentWeapon)
+		{
+			CurrentWeapon->SetMaxAmmo_Weapon(MaxAmmo_Heavy, MaxAmmo_Medium, MaxAmmo_Light, MaxAmmo_Shells, MaxAmmo_Rockets);
+		}
+		if (UnequippedWeapon)
+		{
+			UnequippedWeapon->SetMaxAmmo_Weapon(MaxAmmo_Heavy, MaxAmmo_Medium, MaxAmmo_Light, MaxAmmo_Shells, MaxAmmo_Rockets);
+		}
 	}
 }
 
 
-void ASCharacter::NextWeaponInput()
+void ASCharacter::SetMaxAmmo_Player(FString TypeOfAmmo, int32 AmmoToSetTo)
 {
-	int Num = WeaponNum + 1;
-	EquipWeapon(Weapons[Num]);
+	//Variable so I can just use this
+	int32 MaxAmmoFromWeapon = CurrentWeapon->MaxAmmo;
+
+	if (TypeOfAmmo == "Heavy")
+	{
+		MaxAmmo_Heavy = MaxAmmoFromWeapon;
+	}
+	else if (TypeOfAmmo == "Medium")
+	{
+		MaxAmmo_Medium = MaxAmmoFromWeapon;
+	}
+	else if (TypeOfAmmo == "Light")
+	{
+		MaxAmmo_Light = MaxAmmoFromWeapon;
+	}
+	else if (TypeOfAmmo == "Shells")
+	{
+		MaxAmmo_Shells = MaxAmmoFromWeapon;
+	}
+	else if (TypeOfAmmo == "Rockets")
+	{
+		MaxAmmo_Rockets = MaxAmmoFromWeapon;
+	}
 }
 
 
-void ASCharacter::PreviousWeaponInput()
-{
-	int Num = WeaponNum - 1;
-	Num = FMath::Clamp(Num - 1, 0, 2);
+//CREATE WEAPONS
 
-	EquipWeapon(Weapons[Num]);
+
+bool ASCharacter::ServerCreateWeapons_Validate()
+{
+	//Validate as positive. Add some anti-cheat if neaded.
+	return true;
+}
+
+
+void ASCharacter::ServerCreateWeapons_Implementation()
+{
+	//What it runs when the implimentation is ran after the validation is positive
+	CreateWeapons();
+}
+
+
+//EQUIP WEAPON
+
+
+bool ASCharacter::ServerEquipWeapon_Validate()
+{
+	//Validate as positive. Add some anti-cheat if neaded.
+	return true;
+}
+
+
+void ASCharacter::ServerEquipWeapon_Implementation()
+{
+	//What it runs when the implimentation is ran after the validation is positive
+	EquipWeapon();
 }
 
 
@@ -282,9 +491,6 @@ void ASCharacter::OnHealthChanged(USHealthComponent* OwningHealthComp, float Hea
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		DetachFromControllerPendingDestroy();
 		SetLifeSpan(10.0f);
-
-		//class ASPlayerController* PC = Cast<ASPlayerController>(GetController());
-		//PC->RespawnPlayer(5.0f, false);
 	}
 }
 
@@ -314,6 +520,8 @@ void ASCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ASCharacter, CurrentWeapon);
+	DOREPLIFETIME(ASCharacter, UnequippedWeapon);
+	DOREPLIFETIME(ASCharacter, TransactionItem);
 	DOREPLIFETIME(ASCharacter, bDied);
 }
 

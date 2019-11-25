@@ -8,6 +8,11 @@
 #include "Engine/Engine.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Blueprint/UserWidget.h"
+#include "..\..\Public\Runtime\SGameInstance.h"
+#include "Kismet/GameplayStatics.h"
+#include "GameFramework/GameMode.h"
+#include "Runtime/SSaveGame.h"
+#include "Player/SPlayerState.h"
 
 const static FName SESSION_NAME = TEXT("Game");
 const static FName SERVER_NAME_SETTINGS_KEY = TEXT("ServerName");
@@ -67,7 +72,7 @@ void USGameInstance::OnCreateSessionComplete(FName SessionName, bool Success)
 	UWorld* World = GetWorld();
 	if (!ensure(World != nullptr)) return;
 
-	World->ServerTravel("/Game/Maps/Warmup/Lobby?listen");
+	World->ServerTravel("/Game/Maps/Deathmatch/DM_SwitchArea17?listen");
 }
 
 

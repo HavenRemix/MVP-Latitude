@@ -12,6 +12,7 @@
 #include "SGameInstance.generated.h"
 
 class UUserWidget;
+class ASPlayerController;
 
 /**
  * 
@@ -66,4 +67,8 @@ private:
 	void OnDestroySessionComplete(FName SessionName, bool Success);
 	void OnFindSessionsComplete(bool Success);
 	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
+
+// ------- PLAYER ------- \\
+
+
 };

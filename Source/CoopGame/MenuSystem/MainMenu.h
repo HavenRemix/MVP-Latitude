@@ -73,6 +73,9 @@ private:
 	UPROPERTY(meta = (BindWidget))
 	class UPanelWidget* ServerList;
 
+	UPROPERTY(meta = (BindWidget))
+	class UEditableTextBox* Nickname;
+
 	UFUNCTION()
 	void HostServer();
 
@@ -94,4 +97,5 @@ private:
 	TOptional<uint32> SelectedIndex;
 
 	void UpdateChildren();
+
 };
