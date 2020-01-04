@@ -19,6 +19,7 @@
 #include "Math/UnrealMathUtility.h"
 #include "Player/SPlayerState.h"
 #include "..\..\Public\Player\SCharacter.h"
+#include "Weapon/Grenade/SGrenade.h"
 
 
 
@@ -60,6 +61,8 @@ ASCharacter::ASCharacter()
 
 	WeaponAttachSocketName = "WeaponSocket";
 	WeaponBackAttachSocketName = "WeaponBackSocket";
+
+	GrenadeSelected = 0;
 }
 
 
@@ -117,6 +120,8 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction("Reload", IE_Released, this, &ASCharacter::Reload);
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+
+	PlayerInputComponent->BindAction("ThrowGrenade", IE_Pressed, this, &ASCharacter::YeetGrenade);
 }
 
 
@@ -250,6 +255,25 @@ void ASCharacter::PreviousWeaponInput()
 	//Num = FMath::Clamp(Num - 1, 0, 2);
 	//Weapons[Num]
 	EquipWeapon();
+}
+
+
+void ASCharacter::YeetGrenade()
+{
+	//Spawn the grenade
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	CurrentGrenade = GetWorld()->SpawnActor<ASGrenade>(Grenades[GrenadeSelected], FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+	CurrentGrenade->AttachToComponent(FPSMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
+
+
+	//Set the variables for the grenade
+
+	CurrentGrenade->SetOwner(this);
+	CurrentGrenade->IgnoreActors.Add(this);
+
+	CurrentGrenade->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 }
 
 

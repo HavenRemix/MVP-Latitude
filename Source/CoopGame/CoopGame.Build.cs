@@ -17,7 +17,8 @@ public class CoopGame : ModuleRules
             "NavigationSystem",
             "OnlineSubsystem",
             "OnlineSubsystemUtils",
-            "OnlineSubsystemSteam"
+            "OnlineSubsystemSteam",
+            "ApexDestruction"
         });
 
         PrivateDependencyModuleNames.AddRange(new string[] {

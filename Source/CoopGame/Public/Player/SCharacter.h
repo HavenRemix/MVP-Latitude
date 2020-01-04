@@ -13,6 +13,7 @@ class USkeletalMeshComponent;
 class AActor;
 class USoundCue;
 class ASPlayerController;
+class ASGrenade;
 
 UCLASS()
 class COOPGAME_API ASCharacter : public ACharacter
@@ -46,6 +47,8 @@ protected:
 	void NextWeaponInput();
 
 	void PreviousWeaponInput();
+
+	void YeetGrenade();
 
 // ------- COMPONENTS ------- \\
 
@@ -92,6 +95,14 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TArray<TSubclassOf<ASWeapon>> Weapons;
+
+	UPROPERTY(BlueprintReadOnly, Replicated)
+	ASGrenade* CurrentGrenade;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	TArray<TSubclassOf<ASGrenade>> Grenades;
+
+	int32 GrenadeSelected;
 
 	int WeaponNum;
 

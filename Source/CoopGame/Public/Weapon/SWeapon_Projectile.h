@@ -18,6 +18,12 @@ protected:
 
 	virtual void Fire() override;
 
-	UFUNCTION(BlueprintImplementableEvent)
-	void SpawnProjectile();
+	void SpawnProjectile(AActor* MyOwner);
+		
+	void PlayFireEffects_Projectile();
+
+	class ASProjectile* ProjectileSpawned;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	TSubclassOf<ASProjectile> ProjectileClass;
 };

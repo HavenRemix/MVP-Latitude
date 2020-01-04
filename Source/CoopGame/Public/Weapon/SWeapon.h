@@ -52,6 +52,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	bool bIsProjectile;
 
+	UPROPERTY(EditDefaultsOnly)
+	bool DoFullDamage;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Projectile")
 	float BaseDamage;
 
@@ -83,10 +86,10 @@ protected:
 // ------- SERVER FUNCTIONS ------- \\
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerFire();
+	virtual void ServerFire();
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void ServerReload();
+	virtual void ServerReload();
 
 	UFUNCTION()
 	void OnRep_HitScanTrace();

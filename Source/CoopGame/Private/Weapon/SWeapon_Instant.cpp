@@ -6,7 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "CoopGame.h"
-
+#include "Net/UnrealNetwork.h"
 
 
 static int32 DebugWeaponDrawing = 0;
@@ -18,6 +18,11 @@ FAutoConsoleVariableRef CVARDebugWeaponDrawing(
 
 void ASWeapon_Instant::Fire()
 {
+	if (Role < ROLE_Authority)
+	{
+		ServerFire();
+	}
+
 	AActor* MyOwner = GetOwner();
 	if (MyOwner)
 	{
