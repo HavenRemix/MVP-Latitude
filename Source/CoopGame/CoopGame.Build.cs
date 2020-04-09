@@ -22,8 +22,8 @@ public class CoopGame : ModuleRules
         });
 
         PrivateDependencyModuleNames.AddRange(new string[] {
-            "Slate",
-            "SlateCore"
+            //"Slate",
+            //"SlateCore"
         });
 
     }
